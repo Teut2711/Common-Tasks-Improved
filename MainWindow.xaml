@@ -1,0 +1,113 @@
+﻿<Window x:Class="Common_Tasks.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Common_Tasks"
+        mc:Ignorable="d"
+        Title="Common Tools" Height="600" Width="1000" Icon="/tools.jpg" Background="#FF33A64D">
+
+    <Grid ShowGridLines="True">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250*" />
+            <ColumnDefinition Width="250*" />
+            <ColumnDefinition Width="250*" />
+            <ColumnDefinition Width="250*" />
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,0.6" >
+            <Button x:Name="sheet_merger_button" Padding="2"  Click="Merge_Spreadsheets" Background="#152951" FontSize="18" FontFamily="Segoe Print" Margin="20,10,20,2" Height="186" >
+                <StackPanel Height="156">
+                    <Image x:Name="sheet_merger_image" Height="79" Margin="0,0,0,10" Source="/sheet_merger.png" RenderTransformOrigin="0.48,1.129"/>
+                    <Border BorderBrush="WHITE" BorderThickness="1" CornerRadius="20">
+                        <Label Content="Sheet Merger" Target="{Binding ElementName=sheet_merger_button}" HorizontalContentAlignment="Center" Foreground="White" RenderTransformOrigin="0.483,1.202" Height="44" />
+                    </Border>
+                </StackPanel>
+                <Button.Template>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            <Button x:Name="edit_columns"
+        Content="Edit Columns"
+        Click="Edit_Columns"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        Width="150"
+        Height="50"
+        Background="#FF2F4F4F"
+        Foreground="White"
+        FontSize="16"
+        FontWeight="Bold"
+        BorderThickness="0"
+        Margin="49,20,49,0">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect Color="#FF707070" Direction="320" ShadowDepth="2" BlurRadius="2"/>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type Button}">
+                                    <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="5">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#ffd966"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,0.6" >
+            <Button x:Name="isin_grouper_button" Padding="2"  Click="Group_ISIN" Background="#ED9813" FontSize="18" FontFamily="Segoe Print" Margin="20,10,20,2" Height="186" >
+                <StackPanel Height="156">
+                    <Image x:Name="isin_grouper_image" Height="79" Margin="0,0,0,10" Source="/isin_grouper.png" RenderTransformOrigin="0.48,1.129"/>
+                    <Border BorderBrush="WHITE" BorderThickness="1" CornerRadius="20">
+                        <Label Content="ISIN Grouper" Target="{Binding ElementName=isin_grouper_button}" HorizontalContentAlignment="Center" Foreground="White" RenderTransformOrigin="0.483,1.202" Height="44" />
+                    </Border>
+                </StackPanel>
+                <Button.Template>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,0.6">
+            <Button x:Name="text_substitute_button" Padding="2"  Click="Substitute_Text" Background="#EA1113" FontSize="18" FontFamily="Segoe Print" Margin="20,10,20,93" Grid.Column="2" Height="184" >
+                <Button.Template>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+                <StackPanel Height="156">
+                    <Image x:Name="text_substitute_image" Height="79" Margin="0,0,0,10" Source="/text_substitute.png" RenderTransformOrigin="0.48,1.129"/>
+                    <Border BorderBrush="WHITE" BorderThickness="1" CornerRadius="20">
+                        <Label Content="Text Substitute" Target="{Binding ElementName=text_substitute_button}" HorizontalContentAlignment="Center" Foreground="White" RenderTransformOrigin="0.483,1.202" Height="44" />
+                    </Border>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+
+</Window>

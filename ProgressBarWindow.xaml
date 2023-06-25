@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Common_Tasks"
         mc:Ignorable="d"
-        Title="ProgressBarWindow" Height="94" Width="713">
+        Title="ProgressBarWindow" Height="100" Width="713">
     <Grid>
-        <ProgressBar x:Name="progressBar" HorizontalAlignment="Center" Height="27" Margin="0,39,0,0" VerticalAlignment="Top" Width="670"/>
+        <ProgressBar x:Name="progressBar" Value="0" HorizontalAlignment="Center" Height="27" Margin="0,39,0,0" VerticalAlignment="Top" Width="670"/>
         <TextBlock x:Name="progressText" HorizontalAlignment="Center" Margin="0,10,0,0" TextWrapping="Wrap" Text="Reading Files ...." VerticalAlignment="Top" Width="670"/>
     </Grid>
 </Window>

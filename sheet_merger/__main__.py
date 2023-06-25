@@ -26,15 +26,13 @@ class SpreadsheetMerger:
             *self.folder_path.glob("*.xlsx"),
             *self.folder_path.glob("*.xls"),
         ]
-        sys.out.write(
-            json.dumps({"type": "TOTAL_READS", "counts": len(file_paths)})
-        )
+        print(json.dumps({"type": "TOTAL_READS", "counts": len(file_paths)}))
         file_paths = [str(path) for path in file_paths]
 
         df_complete = pd.concat(
             [
                 self.get_df(path, column_names, counter)
-                for counter, path in enumerate(file_paths)
+                for counter, path in enumerate(file_paths, start=1)
             ],
             ignore_index=True,
         )
@@ -66,7 +64,7 @@ class SpreadsheetMerger:
 
     def get_df(self, path, column_names, counter):
         logging.info(f"Reading file from path: {path}")
-        sys.out.write(
+        print(
             json.dumps(
                 {"type": "READ_FILE", "filename": path, "counter": counter}
             )
@@ -113,13 +111,14 @@ class SpreadsheetMerger:
         return new_df
 
     def save_df(self, df):
+        logging.info(f"Saving to: {self.save_file_path}")
         file_extension = Path(self.save_file_path).suffix.lower()
-        sys.out.write(json.dumps({"type": "TOTAL_SAVES", "counts": 1}))
-        sys.out.write(
+        print(json.dumps({"type": "TOTAL_SAVES", "counts": 1}))
+        print(
             json.dumps(
                 {
                     "type": "SAVE_FILE",
-                    "filename": self.save_file_path,
+                    "filename": self.save_file_path.name,
                     "counter": 1,
                 }
             )
@@ -132,7 +131,7 @@ class SpreadsheetMerger:
             raise ValueError(
                 "Invalid file extension. Supported file extensions are .xlsx, .xls and .csv"
             )
-        sys.out.write(json.dumps({"type": "EXECUTION_COMPLETED", "counts": 1}))
+        print(json.dumps({"type": "EXECUTION_COMPLETED", "counts": 1}))
 
 
 if __name__ == "__main__":

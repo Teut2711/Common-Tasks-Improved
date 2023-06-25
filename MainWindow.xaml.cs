@@ -18,8 +18,13 @@ namespace Common_Tasks
 		}
 		private void Edit_Columns(object sender, RoutedEventArgs e)
 		{
+			string extra_path ="";
+			if (GlobalVariables.DEBUG)
+				 extra_path = "../../../";
+			else
+				 extra_path = "";
 
-			string columnsFilePath = Path.Combine(AppContext.BaseDirectory,"sheet_merger", "columns.txt");
+			string columnsFilePath = Path.Combine(AppContext.BaseDirectory,extra_path, "sheet_merger", "columns.txt");
 			Application.Current.Dispatcher.Invoke(() =>
 			{
 				sheet_merger_button.IsEnabled = false;
@@ -36,7 +41,7 @@ namespace Common_Tasks
 			process.EnableRaisingEvents = true;
 			process.Exited += (s, args) =>
 			{
-			    Application.Current.Dispatcher.Invoke(() =>
+				Application.Current.Dispatcher.Invoke(() =>
 				{
 					sheet_merger_button.IsEnabled = true;
 				});

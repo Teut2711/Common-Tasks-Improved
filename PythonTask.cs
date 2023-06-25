@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -7,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using Serilog;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics.Metrics;
+using System.Reflection;
 
 
 namespace Common_Tasks
@@ -16,7 +17,8 @@ namespace Common_Tasks
 	{
 		private static readonly ILogger log = new LoggerConfiguration()
 		   .MinimumLevel.Information()
-		   .WriteTo.File("./ISIN_grouper.log")
+		   .WriteTo.File("./main.log",
+			outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
 		   .CreateLogger();
 
 		private readonly string pythonScriptName;
@@ -28,13 +30,17 @@ namespace Common_Tasks
 
 			if (inputSourcePath != null && saveSourcePath != null)
 			{
-				    
-				Task.Run(() =>
-				{
+				Task.Run(() =>{
+					string extra_path = "";
+					if (GlobalVariables.DEBUG)
+						extra_path = "../../../";
+					else
+						extra_path = "";
+
 					ProcessStartInfo processStartInfo = new()
 					{
-						FileName = Path.Combine("./python-3.10.9-embed-amd64", "python.exe"),
-						Arguments = $"{Path.Combine(pythonScriptName, "__main__.py")}\" \"{inputSourcePath}\" \"{saveSourcePath}\"",
+						FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,extra_path,"python-3.10.9-embed-amd64", "python.exe"),
+						Arguments = $"\"{Path.Combine(AppDomain.CurrentDomain.BaseDirectory, extra_path, pythonScriptName, "__main__.py")}\" \"{inputSourcePath}\" \"{saveSourcePath}\"",
 						UseShellExecute = false,
 						CreateNoWindow = true,
 						RedirectStandardOutput = true,
@@ -43,65 +49,79 @@ namespace Common_Tasks
 
 
 					using var process = new Process { StartInfo = processStartInfo };
-					ProgressBarWindow progressBarWindow = new()
+					ProgressBarWindow? progressBarWindow = null;
+					Application.Current.Dispatcher.Invoke(() =>
 					{
-						Visibility = Visibility.Visible
-					};
-					var progressBar = progressBarWindow.progressBar;
-					var progressText = progressBarWindow.progressText;
+						progressBarWindow = new ProgressBarWindow
+						{
+							Visibility = Visibility.Visible
+						};
+
+					});
+
+
 
 					process.Start();
 
 					process.BeginOutputReadLine();
 
+					int TOTAL_READS = 0;
+					int TOTAL_SAVES = 0;
 					process.OutputDataReceived += (sender, args) =>
 					{
 						if (args.Data != null)
 						{
 							log.Information($"Received data: {args.Data}");
 
-							JObject? pythonIPCOutput = new(args.Data);
-							int TOTAL_READS = 0;
-							int TOTAL_SAVES = 0;
+
+							JObject pythonIPCOutput = JObject.Parse(args.Data);
+
 							if (pythonIPCOutput != null && pythonIPCOutput.HasValues)
 							{
-								if (pythonIPCOutput["type"].Equals("TOTAL_READS"))
+								if (pythonIPCOutput["type"].Value<string>() == "TOTAL_READS")
 								{
-									TOTAL_READS = int.Parse(pythonIPCOutput["counts"].ToString());
-								}
-								else if (pythonIPCOutput["type"].Equals("TOTAL_SAVES"))
-								{
-									TOTAL_SAVES = int.Parse(pythonIPCOutput["counts"].ToString());
-
+									TOTAL_READS = int.Parse(pythonIPCOutput["counts"].Value<string>());
+									log.Information($"Received data: {TOTAL_READS}");
 
 								}
-								else if (pythonIPCOutput["type"].Equals("READ_FILE"))
+								else if (pythonIPCOutput["type"].Value<string>() == "TOTAL_SAVES")
 								{
-									string filename = pythonIPCOutput["filename"].ToString();
-									int counter = int.Parse(pythonIPCOutput["counter"].ToString());
-									progressBar.Dispatcher.Invoke(() =>
+									TOTAL_SAVES = int.Parse(pythonIPCOutput["counts"].Value<string>());
+									log.Information($"Received data: {TOTAL_SAVES}");
+
+								}
+								else if (pythonIPCOutput["type"].Value<string>() == "READ_FILE")
+								{
+									string filename = pythonIPCOutput["filename"].Value<string>();
+									int counter = int.Parse(pythonIPCOutput["counter"].Value<string>());
+									Application.Current.Dispatcher.Invoke(() =>
 									{
-										progressBar.Value = Convert.ToInt32(counter * 100.0 / TOTAL_READS);
-										progressText.Text = $"Reading file {filename}";
+										log.Information($"Received data: {Convert.ToInt32(counter * 100.0 / TOTAL_READS)}");
+
+										progressBarWindow.progressBar.Value = Convert.ToInt32(counter * 100.0 / TOTAL_READS);
+		
+										progressBarWindow.progressText.Text = $"Reading file {filename}";
 									});
 								}
-								else if (pythonIPCOutput["type"].Equals("SAVE_FILE"))
+								else if (pythonIPCOutput["type"].Value<string>() == "SAVE_FILE")
 								{
-									string filename = pythonIPCOutput["filename"].ToString();
-									int counter = int.Parse(pythonIPCOutput["counter"].ToString());
-									progressBar.Dispatcher.Invoke(() =>
+									string filename = pythonIPCOutput["filename"].Value<string>();
+									int counter = int.Parse(pythonIPCOutput["counter"].Value<string>());
+									Application.Current.Dispatcher.Invoke(() =>
 									{
-										progressBar.Value = Convert.ToInt32(counter * 100.0 / TOTAL_SAVES);
-										progressText.Text = $"Saving file {filename}";
+										log.Information($"Received data: {Convert.ToInt32(counter * 100.0 / TOTAL_SAVES)}");
+
+										progressBarWindow.progressBar.Value = Convert.ToInt32(counter * 100.0 / TOTAL_SAVES);
+										progressBarWindow.progressText.Text = $"Saving file {filename}";
 
 									});
 								}
-								else if (pythonIPCOutput["type"].Equals("EXECUTION_COMPLETED"))
+								else if (pythonIPCOutput["type"].Value<string>()  == "EXECUTION_COMPLETED")
 								{
-									progressBar.Dispatcher.Invoke(() =>
+									Application.Current.Dispatcher.Invoke(() =>
 									{
-										progressBar.Value = 100;
-										progressText.Text = $"Process Completed";
+										progressBarWindow.progressBar.Value = 100;
+										progressBarWindow.progressText.Text = $"Process Completed";
 
 									});
 								}
@@ -154,7 +174,7 @@ namespace Common_Tasks
 
 			if (result == true)
 			{
-				inputSourcePath = Path.GetDirectoryName(fileBrowserDialog.FileName);
+				inputSourcePath = fileBrowserDialog.FileName;
 			}
 			else
 			{
@@ -205,7 +225,7 @@ namespace Common_Tasks
 
 			if (result == true)
 			{
-				saveSourcePath = Path.GetDirectoryName(fileBrowserDialog.FileName);
+				saveSourcePath = fileBrowserDialog.FileName;
 			}
 			else
 			{
